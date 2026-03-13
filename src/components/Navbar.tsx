@@ -17,7 +17,7 @@ export default async function Navbar() {
           <div className="flex items-center gap-6">
             {session ? (
               <>
-                <Link href="/" className="text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                <Link href="/library" className="text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors">
                   My Books
                 </Link>
                 <Link href="/lending" className="text-sm font-medium text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors">

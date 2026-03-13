@@ -31,7 +31,7 @@ export default function LandingPage() {
           
           {/* Action */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href="/register" className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-all shadow-lg hover:shadow-xl active:scale-95 text-center">
+            <Link href="/library" className="w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-all shadow-lg hover:shadow-xl active:scale-95 text-center">
               Get Started
             </Link>
             <Link href="/login" className="w-full sm:w-auto px-8 py-4 bg-white border border-zinc-200 text-zinc-900 font-bold rounded-xl hover:bg-zinc-50 transition-all active:scale-95 text-center">
