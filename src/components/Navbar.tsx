@@ -30,7 +30,7 @@ export default async function Navbar() {
                   </div>
                   <form action={async () => {
                     "use server";
-                    await signOut();
+                    await signOut({ redirectTo: '/login' });
                   }}>
                     <button type="submit" className="flex items-center gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors font-medium">
                       <LogOut className="w-4 h-4" />
