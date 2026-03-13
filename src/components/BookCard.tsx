@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, MoreVertical, Trash2, Edit3, ImageOff } from 'lucide-react';
+import { BookOpen, MoreVertical, Trash2, Edit3, ImageOff, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 export default function BookCard({ book, onEdit, onDelete }: { book: any, onEdit: (b: any) => void, onDelete: (id: string) => void }) {
@@ -153,9 +153,30 @@ export default function BookCard({ book, onEdit, onDelete }: { book: any, onEdit
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2 text-right">
-            {book.currentPage} / {book.totalPages} pages
-          </p>
+          <div className="flex justify-between items-center mt-2">
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500">
+              {book.currentPage} / {book.totalPages} pages
+            </p>
+            {book.status === 'Reading' && (
+              <button 
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (book.currentPage < book.totalPages) {
+                    await fetch(`/api/books/${book._id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ currentPage: book.currentPage + 1 })
+                    });
+                    window.location.reload();
+                  }
+                }}
+                className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                title="Increment page"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

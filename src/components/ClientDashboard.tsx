@@ -15,7 +15,21 @@ export default function ClientDashboard({ userName }: { userName: string }) {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [shelfFilter, setShelfFilter] = useState('');
+  const [shelves, setShelves] = useState<any[]>([]);
   const [loanFilter, setLoanFilter] = useState(false);
+
+  const fetchShelves = async () => {
+    try {
+      const res = await fetch('/api/shelves');
+      if (res.ok) {
+        const data = await res.json();
+        setShelves(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchBooks = async () => {
     try {
@@ -24,11 +38,9 @@ export default function ClientDashboard({ userName }: { userName: string }) {
       const params = new URLSearchParams();
       if (searchQuery) params.append('q', searchQuery);
       if (statusFilter) params.append('status', statusFilter);
-      // Client-side filtering for loans to avoid API change, or pass it to API
-      // Since API just takes filters, it's easier to filter on client or update API.
-      // We will fetch all and filter below.
+      if (shelfFilter) params.append('shelf', shelfFilter);
 
-      const res = await fetch(url);
+      const res = await fetch(`${url}?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setBooks(data);
@@ -41,8 +53,12 @@ export default function ClientDashboard({ userName }: { userName: string }) {
   };
 
   useEffect(() => {
+    fetchShelves();
+  }, []);
+
+  useEffect(() => {
     fetchBooks();
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, shelfFilter]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this book?')) return;
@@ -125,6 +141,18 @@ export default function ClientDashboard({ userName }: { userName: string }) {
             <option value="Unread">Unread</option>
             <option value="Reading">Reading</option>
             <option value="Read">Read</option>
+          </select>
+          <select
+            value={shelfFilter}
+            onChange={(e) => setShelfFilter(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg outline-none transition-all dark:text-white"
+          >
+            <option value="">All Shelves</option>
+            {shelves.map((shelf) => (
+              <option key={shelf._id} value={shelf._id}>
+                {shelf.name}
+              </option>
+            ))}
           </select>
           <button
             onClick={() => setLoanFilter(!loanFilter)}
