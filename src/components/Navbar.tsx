@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth, signOut } from '@/auth';
-import { Library, LogOut, User as UserIcon } from 'lucide-react';
+import { Library, User as UserIcon } from 'lucide-react';
+import SignOutButton from './SignOutButton';
 
 export default async function Navbar() {
   const session = await auth();
@@ -28,15 +29,7 @@ export default async function Navbar() {
                     <UserIcon className="w-4 h-4" />
                     <span>{session.user?.name || session.user?.email}</span>
                   </div>
-                  <form action={async () => {
-                    "use server";
-                    await signOut({ redirectTo: '/login' });
-                  }}>
-                    <button type="submit" className="flex items-center gap-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors font-medium">
-                      <LogOut className="w-4 h-4" />
-                      <span className="hidden sm:inline">Sign out</span>
-                    </button>
-                  </form>
+                  <SignOutButton />
                 </div>
               </>
             ) : (
