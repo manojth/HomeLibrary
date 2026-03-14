@@ -38,26 +38,33 @@ export async function POST(req: Request) {
     const setupUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}&setup=true`;
 
     // Send verification email
-    await resend.emails.send({
-      from: 'Home Library <onboarding@resend.dev>',
-      to: email,
-      subject: 'Complete your Home Library registration',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
-          <h2 style="color: #333;">Welcome to Home Library!</h2>
-          <p>Hi ${name},</p>
-          <p>Thanks for joining! To complete your registration and secure your account, please click the button below to set your password.</p>
-          <div style="margin: 30px 0;">
-            <a href="${setupUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Set My Password</a>
+    if (process.env.RESEND_API_KEY) {
+      await resend.emails.send({
+        from: 'Home Library <onboarding@resend.dev>',
+        to: email,
+        subject: 'Complete your Home Library registration',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 12px;">
+            <h2 style="color: #333;">Welcome to Home Library!</h2>
+            <p>Hi ${name},</p>
+            <p>Thanks for joining! To complete your registration and secure your account, please click the button below to set your password.</p>
+            <div style="margin: 30px 0;">
+              <a href="${setupUrl}" style="background-color: #000; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Set My Password</a>
+            </div>
+            <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+            <p style="color: #999; font-size: 12px;">Home Library App</p>
           </div>
-          <p style="color: #666; font-size: 14px;">This link will expire in 24 hours.</p>
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-          <p style="color: #999; font-size: 12px;">Home Library App</p>
-        </div>
-      `,
-    });
+        `,
+      });
+    } else {
+      console.warn('RESEND_API_KEY missing. Registration link (local testing):', setupUrl);
+    }
 
-    return NextResponse.json({ message: 'Registration initiated. Please check your email to complete your account setup.' }, { status: 201 });
+    return NextResponse.json({ 
+      message: 'Registration initiated. Please check your email to complete your account setup.',
+      debugLink: process.env.NODE_ENV === 'development' ? setupUrl : undefined 
+    }, { status: 201 });
   } catch (error: any) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: error.message || 'Error creating user' }, { status: 500 });
