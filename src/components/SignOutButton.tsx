@@ -1,23 +1,14 @@
 'use client';
 
+import { signOut } from 'next-auth/react';
 import { LogOut } from 'lucide-react';
 
 export default function SignOutButton() {
   const handleSignOut = async () => {
-    // Use the NextAuth signout API endpoint directly
-    // This avoids server action redirect issues on Vercel
-    const res = await fetch('/api/auth/signout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ csrfToken: await getCsrfToken() }),
-    });
-
-    if (res.ok) {
-      window.location.href = '/login';
-    } else {
-      // Fallback: just redirect
-      window.location.href = '/api/auth/signout';
-    }
+    // Using the standard NextAuth client-side signOut
+    // We set redirect to false to manually handle it if needed, 
+    // or just let it redirect to the callbackUrl (default is '/')
+    await signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -29,10 +20,4 @@ export default function SignOutButton() {
       <span className="hidden sm:inline">Sign out</span>
     </button>
   );
-}
-
-async function getCsrfToken(): Promise<string> {
-  const res = await fetch('/api/auth/csrf');
-  const data = await res.json();
-  return data.csrfToken;
 }
