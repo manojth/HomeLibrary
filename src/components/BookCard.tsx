@@ -29,11 +29,22 @@ export default function BookCard({ book, onEdit, onDelete }: { book: any, onEdit
       {/* Cover Image */}
       <div className="h-48 bg-zinc-100 dark:bg-zinc-950 flex items-center justify-center relative overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
         {book.coverImageUrl ? (
-          <img 
-            src={book.coverImageUrl} 
-            alt={book.title} 
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-          />
+          <div className="w-full h-full relative">
+            <img 
+              src={book.coverImageUrl} 
+              alt={book.title} 
+              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-600 bg-zinc-100 dark:bg-zinc-950">
+              <ImageOff className="w-8 h-8 mb-2 opacity-50" />
+              <span className="text-xs uppercase tracking-wider font-semibold opacity-50">Invalid Cover</span>
+            </div>
+          </div>
         ) : (
           <div className="text-zinc-400 dark:text-zinc-600 flex flex-col items-center">
             <ImageOff className="w-8 h-8 mb-2 opacity-50" />

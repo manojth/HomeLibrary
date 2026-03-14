@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Image as ImageIcon, ImageOff } from 'lucide-react';
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -178,7 +178,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
               <label className="flex flex-col gap-2">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Cover URL</span>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl select-none">image</span>
+                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 select-none" />
                   <input
                     type="url"
                     value={formData.coverImageUrl}
@@ -189,6 +189,27 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                 </div>
               </label>
             </div>
+
+            {/* Preview Area */}
+            {formData.coverImageUrl && (
+              <div className="flex justify-center">
+                <div className="relative h-48 w-32 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                  <img
+                    src={formData.coverImageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                    <ImageOff className="w-8 h-8 mb-1 opacity-50" />
+                    <span className="text-[10px] uppercase font-bold opacity-50">Invalid URL</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Status */}
             <label className="flex flex-col gap-2">

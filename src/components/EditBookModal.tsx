@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { X, Loader2, Image as ImageIcon, ImageOff } from 'lucide-react';
 
 interface EditBookModalProps {
   book: any;
@@ -211,6 +211,27 @@ export default function EditBookModal({ book, isOpen, onClose, onSuccess }: Edit
                 className="w-full px-4 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 outline-none transition-all dark:text-white"
               />
             </div>
+
+            {/* Preview Area */}
+            {formData.coverImageUrl && (
+              <div className="flex justify-center">
+                <div className="relative h-48 w-32 bg-zinc-100 dark:bg-zinc-950 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-inner">
+                  <img
+                    src={formData.coverImageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                  <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-zinc-400">
+                    <ImageOff className="w-8 h-8 mb-1 opacity-50" />
+                    <span className="text-[10px] uppercase font-bold opacity-50">Invalid URL</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">Shelves</label>
