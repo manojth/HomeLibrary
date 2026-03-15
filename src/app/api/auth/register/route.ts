@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
     // Send verification email
     if (process.env.RESEND_API_KEY) {
-      await resend.emails.send({
+      const { error: emailError } = await resend.emails.send({
         from: 'Home Library <onboarding@resend.dev>',
         to: email,
         subject: 'Complete your Home Library registration',
@@ -57,8 +57,15 @@ export async function POST(req: Request) {
           </div>
         `,
       });
+      if (emailError) {
+        console.warn('Email sending failed:', emailError);
+      }
     } else {
       console.warn('RESEND_API_KEY missing. Registration link (local testing):', setupUrl);
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Registration setup link:', setupUrl);
     }
 
     return NextResponse.json({ 

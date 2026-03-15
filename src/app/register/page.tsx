@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [debugLink, setDebugLink] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +34,7 @@ export default function RegisterPage() {
         throw new Error(data.error || 'Something went wrong');
       }
 
+      if (data.debugLink) setDebugLink(data.debugLink);
       setIsSuccess(true);
     } catch (err: any) {
       setError(err.message);
@@ -56,16 +58,27 @@ export default function RegisterPage() {
             Click the link in the email to set your password and complete your registration.
           </p>
           <div className="space-y-4">
-            <Link 
-              href="/login" 
-              className="w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 group"
+            {debugLink && (
+              <a
+                href={debugLink}
+                className="w-full py-3 px-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 group"
+              >
+                Complete Setup Now
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </a>
+            )}
+            <Link
+              href="/login"
+              className={`w-full py-3 px-4 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 group ${debugLink ? 'border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800' : 'bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900'}`}
             >
               Back to Login
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <p className="text-xs text-zinc-400">
-              Didn't receive an email? Check your spam folder.
-            </p>
+            {!debugLink && (
+              <p className="text-xs text-zinc-400">
+                Didn't receive an email? Check your spam folder.
+              </p>
+            )}
           </div>
         </div>
       </div>
