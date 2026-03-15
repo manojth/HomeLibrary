@@ -64,7 +64,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     searchTimeout.current = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const res = await fetch(`/api/books/search?q=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/book-search?q=${encodeURIComponent(query)}`);
         const items: BookSuggestion[] = await res.json();
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
