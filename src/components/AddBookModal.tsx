@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Loader2, Image as ImageIcon, ImageOff } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, Image as ImageIcon, Search } from 'lucide-react';
+
+interface BookSuggestion {
+  title: string;
+  author: string;
+  totalPages: string;
+  coverImageUrl: string;
+}
 
 interface AddBookModalProps {
   isOpen: boolean;
@@ -14,6 +21,11 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
   const [error, setError] = useState('');
   const [shelves, setShelves] = useState<any[]>([]);
   const [newShelfName, setNewShelfName] = useState('');
+  const [suggestions, setSuggestions] = useState<BookSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -31,6 +43,66 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
       });
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchBooks = (query: string) => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    if (!query.trim() || query.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    searchTimeout.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&langRestrict=en`
+        );
+        const data = await res.json();
+        const items: BookSuggestion[] = (data.items || []).map((item: any) => {
+          const info = item.volumeInfo;
+          return {
+            title: info.title || '',
+            author: (info.authors || []).join(', '),
+            totalPages: info.pageCount ? String(info.pageCount) : '',
+            coverImageUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
+          };
+        });
+        setSuggestions(items);
+        setShowSuggestions(items.length > 0);
+      } catch {
+        setSuggestions([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+  };
+
+  const handleTitleChange = (value: string) => {
+    setFormData(prev => ({ ...prev, title: value }));
+    searchBooks(value);
+  };
+
+  const handleSelectSuggestion = (book: BookSuggestion) => {
+    setFormData(prev => ({
+      ...prev,
+      title: book.title,
+      author: book.author,
+      totalPages: book.totalPages,
+      coverImageUrl: book.coverImageUrl,
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   const toggleShelf = (id: string) => {
     setFormData(prev => ({
@@ -102,10 +174,8 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      {/* Backdrop click to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      {/* Modal Window */}
       <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
         {/* Drag handle */}
         <div className="flex h-5 w-full items-center justify-center mt-1">
@@ -127,20 +197,61 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
               </div>
             )}
 
-            {/* Title & Author */}
+            {/* Title with autocomplete */}
             <div className="grid grid-cols-1 gap-6">
               <label className="flex flex-col gap-2">
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                   Book Title <span className="text-red-400">*</span>
                 </span>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none h-12 px-4 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-all"
-                  placeholder="e.g. The Great Gatsby"
-                />
+                <div className="relative" ref={suggestionRef}>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    {searchLoading && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 animate-spin" />
+                    )}
+                    <input
+                      type="text"
+                      required
+                      value={formData.title}
+                      onChange={(e) => handleTitleChange(e.target.value)}
+                      onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none h-12 pl-10 pr-10 text-base text-slate-900 dark:text-slate-100 placeholder:text-slate-400 transition-all"
+                      placeholder="Search by title..."
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  {/* Dropdown */}
+                  {showSuggestions && (
+                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
+                      {suggestions.map((book, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleSelectSuggestion(book)}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+                        >
+                          {book.coverImageUrl ? (
+                            <img
+                              src={book.coverImageUrl}
+                              alt=""
+                              className="w-9 h-12 object-cover rounded flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-9 h-12 bg-slate-200 dark:bg-slate-700 rounded flex-shrink-0" />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">{book.title}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{book.author || 'Unknown author'}</p>
+                            {book.totalPages && (
+                              <p className="text-xs text-slate-400 dark:text-slate-500">{book.totalPages} pages</p>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </label>
 
               <label className="flex flex-col gap-2">
@@ -204,7 +315,6 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                     }}
                   />
                   <div className="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                    <ImageOff className="w-8 h-8 mb-1 opacity-50" />
                     <span className="text-[10px] uppercase font-bold opacity-50">Invalid URL</span>
                   </div>
                 </div>
@@ -250,7 +360,6 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                   );
                 })}
 
-                {/* Inline new shelf input */}
                 <div className="flex items-center gap-1">
                   <input
                     type="text"
