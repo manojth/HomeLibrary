@@ -64,19 +64,8 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     searchTimeout.current = setTimeout(async () => {
       setSearchLoading(true);
       try {
-        const res = await fetch(
-          `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&langRestrict=en`
-        );
-        const data = await res.json();
-        const items: BookSuggestion[] = (data.items || []).map((item: any) => {
-          const info = item.volumeInfo;
-          return {
-            title: info.title || '',
-            author: (info.authors || []).join(', '),
-            totalPages: info.pageCount ? String(info.pageCount) : '',
-            coverImageUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
-          };
-        });
+        const res = await fetch(`/api/books/search?q=${encodeURIComponent(query)}`);
+        const items: BookSuggestion[] = await res.json();
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
       } catch {
@@ -223,7 +212,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
 
                   {/* Dropdown */}
                   {showSuggestions && (
-                    <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
+                    <div className="absolute z-[9999] w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg overflow-hidden">
                       {suggestions.map((book, i) => (
                         <button
                           key={i}
