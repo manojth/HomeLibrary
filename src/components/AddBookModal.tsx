@@ -176,7 +176,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl">
         {/* Drag handle */}
         <div className="flex h-5 w-full items-center justify-center mt-1">
           <div className="h-1 w-12 rounded-full bg-slate-200 dark:bg-slate-700" />
@@ -380,7 +380,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-8 py-5 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 px-8 py-5 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 rounded-b-2xl">
             <button
               type="button"
               onClick={onClose}
