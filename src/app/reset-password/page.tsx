@@ -9,6 +9,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
+  const isSetup = searchParams.get('setup') === 'true';
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,22 +18,38 @@ function ResetPasswordForm() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const header = (
+    <>
+      <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">
+        {isSetup ? 'Complete Registration' : 'Set New Password'}
+      </h2>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center mb-8">
+        {isSetup
+          ? 'Welcome! Please choose a secure password to complete your account setup.'
+          : 'Please enter your new secure password.'}
+      </p>
+    </>
+  );
+
   if (!token) {
     return (
-      <div className="text-center">
-        <div className="flex justify-center mb-4">
-          <XCircle className="w-16 h-16 text-red-500 opacity-20" />
+      <>
+        {header}
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <XCircle className="w-16 h-16 text-red-500 opacity-20" />
+          </div>
+          <p className="text-slate-700 dark:text-slate-300 mb-6 font-medium">
+            Invalid or missing reset token. Please request a new link.
+          </p>
+          <Link
+            href="/forgot-password"
+            className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-2 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-white transition-colors"
+          >
+            Request new link
+          </Link>
         </div>
-        <p className="text-slate-700 dark:text-slate-300 mb-6 font-medium">
-          Invalid or missing reset token. Please request a new link.
-        </p>
-        <Link 
-          href="/forgot-password"
-          className="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-6 py-2 rounded-lg font-semibold hover:bg-slate-800 dark:hover:bg-white transition-colors"
-        >
-          Request new link
-        </Link>
-      </div>
+      </>
     );
   }
 
@@ -69,6 +86,7 @@ function ResetPasswordForm() {
 
   return (
     <>
+      {header}
       {message ? (
         <div className="text-center animate-in fade-in zoom-in-95 duration-500">
           <div className="flex justify-center mb-4">
@@ -140,9 +158,6 @@ function ResetPasswordForm() {
 }
 
 export default function ResetPasswordPage() {
-  const searchParams = useSearchParams();
-  const isSetup = searchParams.get('setup') === 'true';
-
   return (
     <div className="bg-slate-50 dark:bg-slate-950 font-display min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 p-8">
@@ -150,20 +165,12 @@ export default function ResetPasswordPage() {
           <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 text-primary">
             <Library className="w-7 h-7" />
           </div>
-          <h2 className="text-slate-900 dark:text-slate-100 text-2xl font-bold tracking-tight">
-            {isSetup ? 'Complete Registration' : 'Set New Password'}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">
-            {isSetup 
-              ? "Welcome! Please choose a secure password to complete your account setup." 
-              : "Please enter your new secure password."}
-          </p>
         </div>
 
         <Suspense fallback={
           <div className="flex flex-col items-center justify-center py-8">
             <Loader2 className="w-10 h-10 animate-spin text-primary opacity-20" />
-            <p className="text-sm text-slate-400 mt-4">Loading reset form...</p>
+            <p className="text-sm text-slate-400 mt-4">Loading...</p>
           </div>
         }>
           <ResetPasswordForm />
