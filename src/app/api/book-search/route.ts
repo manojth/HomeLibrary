@@ -9,8 +9,11 @@ export async function GET(req: Request) {
   }
 
   try {
+    const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
+    const keyParam = apiKey ? `&key=${apiKey}` : '';
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=6&langRestrict=en`
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(query)}&printType=books&maxResults=6${keyParam}`,
+      { cache: 'no-store' }
     );
     const data = await res.json();
 
