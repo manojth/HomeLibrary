@@ -24,6 +24,7 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
   const [suggestions, setSuggestions] = useState<BookSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [debugInfo, setDebugInfo] = useState('');
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
 
@@ -65,10 +66,13 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
       setSearchLoading(true);
       try {
         const res = await fetch(`/api/book-search?q=${encodeURIComponent(query)}`);
-        const items: BookSuggestion[] = await res.json();
+        const raw = await res.text();
+        setDebugInfo(`Status: ${res.status} | Body: ${raw.slice(0, 200)}`);
+        const items: BookSuggestion[] = JSON.parse(raw);
         setSuggestions(items);
         setShowSuggestions(items.length > 0);
-      } catch {
+      } catch (e: any) {
+        setDebugInfo(`Error: ${e.message}`);
         setSuggestions([]);
       } finally {
         setSearchLoading(false);
@@ -209,6 +213,11 @@ export default function AddBookModal({ isOpen, onClose, onSuccess }: AddBookModa
                       autoComplete="off"
                     />
                   </div>
+
+                  {/* DEBUG */}
+                  {debugInfo && (
+                    <p className="mt-1 text-xs text-orange-500 break-all">{debugInfo}</p>
+                  )}
 
                   {/* Dropdown */}
                   {showSuggestions && (
