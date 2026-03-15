@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     // Send verification email
     if (process.env.RESEND_API_KEY) {
       const { error: emailError } = await resend.emails.send({
-        from: 'Home Library <onboarding@resend.dev>',
+        from: 'Home Library <noreply@homelibrary.fun>',
         to: email,
         subject: 'Complete your Home Library registration',
         html: `

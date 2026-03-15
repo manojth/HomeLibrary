@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     // Send email
     if (process.env.RESEND_API_KEY) {
       await resend.emails.send({
-        from: 'Home Library <onboarding@resend.dev>', // You should update this with your verified domain
+        from: 'Home Library <noreply@homelibrary.fun>',
         to: email,
         subject: 'Reset your Home Library password',
         html: `
